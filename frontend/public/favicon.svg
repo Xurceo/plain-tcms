@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <!-- Clip path to restrict the inner split colors to the expanded innermost circle -->
+    <clipPath id="inner-circle-clip">
+      <circle cx="250" cy="250" r="50.25" />
+    </clipPath>
+  </defs>
+
+  <!-- 1. Outer Dark Green Circle -->
+  <circle cx="250" cy="250" r="69" fill="#004d26" />
+
+  <!-- 2. Green Circle -->
+  <circle cx="250" cy="250" r="62.75" fill="#00a859" />
+
+  <!-- 3. Dark Green Circle after Green Circle -->
+  <circle cx="250" cy="250" r="56.5" fill="#004d26" />
+
+  <!-- 4. Innermost Dark Green Circle -->
+  <circle cx="250" cy="250" r="50.25" fill="#004d26" />
+
+  <!-- Split Inner Core (Upper Light Red / Lower Light Yellow) -->
+  <g clip-path="url(#inner-circle-clip)">
+    <!-- Upper half light red -->
+    <rect x="190" y="190" width="120" height="60" fill="#ff6666" />
+    <!-- Lower half light yellow -->
+    <rect x="190" y="250" width="120" height="60" fill="#ffff99" />
+  </g>
+
+  <!-- 5. Text: "TCMS" (Vertically centered by setting dominant-baseline to central) -->
+  <text x="250" y="250" 
+        font-family="Impact, sans-serif" 
+        font-size="33" 
+        font-weight="bold" 
+        letter-spacing="0.5"
+        text-anchor="middle" 
+        dominant-baseline="central"
+        fill="#00c853" 
+        stroke="#004d26" 
+        stroke-width="2.2" 
+        stroke-linejoin="round">TCMS</text>
+</svg>
