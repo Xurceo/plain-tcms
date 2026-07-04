@@ -60,6 +60,21 @@ func handleCreate[Req any, Res any](c *gin.Context, create func(Req) (Res, error
 	c.JSON(http.StatusCreated, item)
 }
 
+func handleUpdate[Req any, Res any](c *gin.Context, update func(string, Req) (Res, error)) {
+	id := c.Param("id")
+	req, ok := bindJSON[Req](c)
+	if !ok {
+		return
+	}
+	item, err := update(id, req)
+	if err != nil {
+		slog.Error("failed to update", "error", err, "id", id)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, item)
+}
+
 func handleDelete(c *gin.Context, delete func(string) error) {
 	id := c.Param("id")
 	if err := delete(id); err != nil {

@@ -21,11 +21,18 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/xurceo/plain-tcms/endpoints"
+	"github.com/xurceo/plain-tcms/repository"
+	"gorm.io/gorm"
 )
 
-func orgnizationsRoutes(r *gin.RouterGroup) {
-	r.GET("/organizations", endpoints.GetAllOrganizations)
-	r.GET("/organizations/:id", endpoints.GetOrganizationByID)
-	r.POST("/organizations", endpoints.CreateOrganization)
-	r.DELETE("/organizations/:id", endpoints.DeleteOrganization)
+func organizationRoutes(r *gin.RouterGroup, db *gorm.DB) {
+	h := endpoints.NewOrganizationHandler(repository.NewOrganizationRepo(db))
+
+	r.GET("/organizations", h.GetAllOrganizations)
+	r.POST("/organizations", h.CreateOrganization)
+	r.GET("/organizations/:id", h.GetOrganizationByID)
+	r.DELETE("/organizations/:id", h.DeleteOrganization)
+	r.GET("/organizations/:id/members", h.GetMembers)
+	r.POST("/organizations/:id/members", h.AddMember)
+	r.DELETE("/organizations/:id/members/:user_id", h.RemoveMember)
 }

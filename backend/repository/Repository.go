@@ -16,14 +16,32 @@
  * // along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package queries
+package repository
 
-const ProjectColumns = "id, org_id, name, description, created_by, created_at"
-
-const (
-	GetAllProjects   = "SELECT " + ProjectColumns + " FROM projects"
-	GetProjectByID   = "SELECT " + ProjectColumns + " FROM projects WHERE id = $1"
-	GetProjectsByOrg = "SELECT " + ProjectColumns + " FROM projects WHERE org_id = $1"
-	InsertProject    = "INSERT INTO projects (org_id, name, description, created_by) VALUES ($1, $2, $3, $4) RETURNING " + ProjectColumns
-	DeleteProject    = "DELETE FROM projects WHERE id = $1"
+import (
+	"gorm.io/gorm"
 )
+
+type BaseRepository struct {
+	db *gorm.DB
+}
+
+func NewBaseRepository(db *gorm.DB) BaseRepository {
+	return BaseRepository{db: db}
+}
+
+func (r *BaseRepository) FetchAll(query string, dest any, args ...any) error {
+	return r.db.Raw(query, args...).Scan(dest).Error
+}
+
+func (r *BaseRepository) FetchOne(query string, dest any, args ...any) error {
+	return r.db.Raw(query, args...).First(dest).Error
+}
+
+func (r *BaseRepository) Insert(query string, dest any, args ...any) error {
+	return r.db.Raw(query, args...).Scan(dest).Error
+}
+
+func (r *BaseRepository) Delete(query string, args ...any) error {
+	return r.db.Exec(query, args...).Error
+}

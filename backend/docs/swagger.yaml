@@ -1,5 +1,30 @@
 basePath: /api/v1
 definitions:
+  entities.AuthResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/entities.User'
+    type: object
+  entities.CreateDefectRequest:
+    properties:
+      external_link:
+        type: string
+      result_id:
+        type: string
+      severity:
+        type: string
+      title:
+        type: string
+    type: object
+  entities.CreateOrganizationMemberRequest:
+    properties:
+      role:
+        type: string
+      user_id:
+        type: string
+    type: object
   entities.CreateOrganizationRequest:
     properties:
       name:
@@ -14,6 +39,13 @@ definitions:
       name:
         type: string
       org_id:
+        type: string
+    type: object
+  entities.CreateResultAttachmentRequest:
+    properties:
+      file_type:
+        type: string
+      file_url:
         type: string
     type: object
   entities.CreateTestCaseRequest:
@@ -37,9 +69,71 @@ definitions:
       type:
         type: string
     type: object
+  entities.CreateTestPlanRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+  entities.CreateTestResultRequest:
+    properties:
+      comment:
+        type: string
+      duration_ms:
+        type: integer
+      status:
+        type: string
+      test_case_id:
+        type: string
+    type: object
+  entities.CreateTestRunRequest:
+    properties:
+      build_version:
+        type: string
+      environment:
+        type: string
+      name:
+        type: string
+      plan_id:
+        type: string
+    type: object
+  entities.CreateTestSuiteRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      parent_id:
+        type: string
+    type: object
+  entities.Defect:
+    properties:
+      created_at:
+        type: string
+      external_link:
+        type: string
+      id:
+        type: string
+      result_id:
+        type: string
+      severity:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+    type: object
   entities.ErrorResponse:
     properties:
       error:
+        type: string
+    type: object
+  entities.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
         type: string
     type: object
   entities.Organization:
@@ -51,6 +145,15 @@ definitions:
       name:
         type: string
     type: object
+  entities.OrganizationMember:
+    properties:
+      org_id:
+        type: string
+      role:
+        type: string
+      user_id:
+        type: string
+    type: object
   entities.Project:
     properties:
       created_at:
@@ -60,11 +163,31 @@ definitions:
       description:
         type: string
       id:
-        type: integer
+        type: string
       name:
         type: string
       org_id:
-        type: integer
+        type: string
+    type: object
+  entities.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  entities.ResultAttachment:
+    properties:
+      created_at:
+        type: string
+      file_type:
+        type: string
+      file_url:
+        type: string
+      id:
+        type: string
+      result_id:
+        type: string
     type: object
   entities.TestCase:
     properties:
@@ -101,12 +224,233 @@ definitions:
       updated_at:
         type: string
     type: object
+  entities.TestCaseHistory:
+    properties:
+      changed_at:
+        type: string
+      changed_by:
+        type: string
+      id:
+        type: string
+      snapshot: {}
+      test_case_id:
+        type: string
+    type: object
+  entities.TestPlan:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      project_id:
+        type: string
+    type: object
+  entities.TestResult:
+    properties:
+      comment:
+        type: string
+      created_at:
+        type: string
+      duration_ms:
+        type: integer
+      executed_by:
+        type: string
+      id:
+        type: string
+      run_id:
+        type: string
+      status:
+        type: string
+      test_case_id:
+        type: string
+    type: object
+  entities.TestRun:
+    properties:
+      build_version:
+        type: string
+      completed_at:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      environment:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      plan_id:
+        type: string
+      project_id:
+        type: string
+      status:
+        type: string
+    type: object
+  entities.TestSuite:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      parent_id:
+        type: string
+      project_id:
+        type: string
+    type: object
+  entities.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
   title: Plain-TCMS API
   version: "1.0"
 paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Login
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/entities.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Log in a user
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Registration
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/entities.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entities.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Register a new user
+      tags:
+      - Auth
+  /defects/{id}:
+    delete:
+      parameters:
+      - description: Defect ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Delete defect
+      tags:
+      - Defects
+    get:
+      parameters:
+      - description: Defect ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Defect'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Get defect by ID
+      tags:
+      - Defects
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Defect ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Defect
+        in: body
+        name: defect
+        required: true
+        schema:
+          $ref: '#/definitions/entities.CreateDefectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Defect'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Update defect
+      tags:
+      - Defects
   /organizations:
     get:
       produces:
@@ -190,6 +534,86 @@ paths:
           schema:
             $ref: '#/definitions/entities.ErrorResponse'
       summary: Get organization by ID
+      tags:
+      - Organizations
+  /organizations/{id}/members:
+    get:
+      parameters:
+      - description: Organization ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entities.OrganizationMember'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Get organization members
+      tags:
+      - Organizations
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Organization ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Member
+        in: body
+        name: member
+        required: true
+        schema:
+          $ref: '#/definitions/entities.CreateOrganizationMemberRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entities.OrganizationMember'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Add member to organization
+      tags:
+      - Organizations
+  /organizations/{id}/members/{user_id}:
+    delete:
+      parameters:
+      - description: Organization ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Remove member from organization
       tags:
       - Organizations
   /organizations/{org_id}/projects:
@@ -310,6 +734,39 @@ paths:
       summary: Get project by ID
       tags:
       - Projects
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Project
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/entities.CreateProjectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Project'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Update project
+      tags:
+      - Projects
   /projects/{id}/test-cases:
     get:
       parameters:
@@ -317,7 +774,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -327,10 +784,6 @@ paths:
             items:
               $ref: '#/definitions/entities.TestCase'
             type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/entities.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -346,7 +799,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: Test Case
         in: body
         name: test_case
@@ -371,4 +824,734 @@ paths:
       summary: Create test case
       tags:
       - Test Cases
+  /projects/{id}/test-plans:
+    get:
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entities.TestPlan'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Get test plans by project
+      tags:
+      - Test Plans
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Test Plan
+        in: body
+        name: test_plan
+        required: true
+        schema:
+          $ref: '#/definitions/entities.CreateTestPlanRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entities.TestPlan'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Create test plan
+      tags:
+      - Test Plans
+  /projects/{id}/test-runs:
+    get:
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entities.TestRun'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Get test runs by project
+      tags:
+      - Test Runs
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Test Run
+        in: body
+        name: test_run
+        required: true
+        schema:
+          $ref: '#/definitions/entities.CreateTestRunRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entities.TestRun'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Create test run
+      tags:
+      - Test Runs
+  /projects/{id}/test-suites:
+    get:
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entities.TestSuite'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Get test suites by project
+      tags:
+      - Test Suites
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Test Suite
+        in: body
+        name: test_suite
+        required: true
+        schema:
+          $ref: '#/definitions/entities.CreateTestSuiteRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entities.TestSuite'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Create test suite
+      tags:
+      - Test Suites
+  /test-cases/{id}:
+    delete:
+      parameters:
+      - description: Test Case ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Delete test case
+      tags:
+      - Test Cases
+    get:
+      parameters:
+      - description: Test Case ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.TestCase'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Get test case by ID
+      tags:
+      - Test Cases
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Test Case ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Test Case
+        in: body
+        name: test_case
+        required: true
+        schema:
+          $ref: '#/definitions/entities.CreateTestCaseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.TestCase'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Update test case
+      tags:
+      - Test Cases
+  /test-cases/{id}/history:
+    get:
+      parameters:
+      - description: Test Case ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entities.TestCaseHistory'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Get test case history
+      tags:
+      - Test Cases
+  /test-plans/{id}:
+    delete:
+      parameters:
+      - description: Test Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Delete test plan
+      tags:
+      - Test Plans
+    get:
+      parameters:
+      - description: Test Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.TestPlan'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Get test plan by ID
+      tags:
+      - Test Plans
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Test Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Test Plan
+        in: body
+        name: test_plan
+        required: true
+        schema:
+          $ref: '#/definitions/entities.CreateTestPlanRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.TestPlan'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Update test plan
+      tags:
+      - Test Plans
+  /test-results/{id}:
+    get:
+      parameters:
+      - description: Test Result ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.TestResult'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Get test result by ID
+      tags:
+      - Test Results
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Test Result ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Test Result
+        in: body
+        name: result
+        required: true
+        schema:
+          $ref: '#/definitions/entities.CreateTestResultRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.TestResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Update test result
+      tags:
+      - Test Results
+  /test-results/{id}/attachments:
+    get:
+      parameters:
+      - description: Test Result ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entities.ResultAttachment'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Get attachments for a test result
+      tags:
+      - Test Results
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Test Result ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Attachment
+        in: body
+        name: attachment
+        required: true
+        schema:
+          $ref: '#/definitions/entities.CreateResultAttachmentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entities.ResultAttachment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Add attachment to test result
+      tags:
+      - Test Results
+  /test-runs/{id}:
+    delete:
+      parameters:
+      - description: Test Run ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Delete test run
+      tags:
+      - Test Runs
+    get:
+      parameters:
+      - description: Test Run ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.TestRun'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Get test run by ID
+      tags:
+      - Test Runs
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Test Run ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Test Run
+        in: body
+        name: test_run
+        required: true
+        schema:
+          $ref: '#/definitions/entities.CreateTestRunRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.TestRun'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Update test run
+      tags:
+      - Test Runs
+  /test-runs/{id}/cases:
+    get:
+      parameters:
+      - description: Test Run ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entities.TestCase'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Get test cases in a run
+      tags:
+      - Test Runs
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Test Run ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Test case ID
+        in: body
+        name: case
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Add test case to run
+      tags:
+      - Test Runs
+  /test-runs/{id}/cases/{test_case_id}:
+    delete:
+      parameters:
+      - description: Test Run ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Test Case ID
+        in: path
+        name: test_case_id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Remove test case from run
+      tags:
+      - Test Runs
+  /test-runs/{id}/results:
+    get:
+      parameters:
+      - description: Test Run ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entities.TestResult'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Get test results for a run
+      tags:
+      - Test Runs
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Test Run ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Test Result
+        in: body
+        name: result
+        required: true
+        schema:
+          $ref: '#/definitions/entities.CreateTestResultRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entities.TestResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Add test result to run
+      tags:
+      - Test Runs
+  /test-suites/{id}:
+    delete:
+      parameters:
+      - description: Test Suite ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Delete test suite
+      tags:
+      - Test Suites
+    get:
+      parameters:
+      - description: Test Suite ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.TestSuite'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Get test suite by ID
+      tags:
+      - Test Suites
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Test Suite ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Test Suite
+        in: body
+        name: test_suite
+        required: true
+        schema:
+          $ref: '#/definitions/entities.CreateTestSuiteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.TestSuite'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Update test suite
+      tags:
+      - Test Suites
 swagger: "2.0"

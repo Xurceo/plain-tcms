@@ -46,7 +46,7 @@ func main() {
 	r := gin.Default()
 	r.Use(cors.Default())
 
-	routes.Setup(r)
+	routes.Setup(r, db.DB)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})

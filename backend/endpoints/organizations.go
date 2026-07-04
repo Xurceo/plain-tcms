@@ -19,9 +19,21 @@
 package endpoints
 
 import (
+	"log/slog"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
+	"github.com/xurceo/plain-tcms/entities"
 	"github.com/xurceo/plain-tcms/repository"
 )
+
+type OrganizationHandler struct {
+	repo repository.OrganizationRepository
+}
+
+func NewOrganizationHandler(repo repository.OrganizationRepository) *OrganizationHandler {
+	return &OrganizationHandler{repo: repo}
+}
 
 // GetAllOrganizations godoc
 // @Summary Get all organizations
@@ -30,8 +42,8 @@ import (
 // @Success 200 {array} entities.Organization
 // @Failure 500 {object} entities.ErrorResponse
 // @Router /organizations [get]
-func GetAllOrganizations(c *gin.Context) {
-	handleGetAll(c, repository.GetAllOrganizations)
+func (h *OrganizationHandler) GetAllOrganizations(c *gin.Context) {
+	handleGetAll(c, h.repo.GetAllOrganizations)
 }
 
 // GetOrganizationByID godoc
@@ -42,8 +54,8 @@ func GetAllOrganizations(c *gin.Context) {
 // @Success 200 {object} entities.Organization
 // @Failure 404 {object} entities.ErrorResponse
 // @Router /organizations/{id} [get]
-func GetOrganizationByID(c *gin.Context) {
-	handleGetByID(c, repository.GetOrganizationByID)
+func (h *OrganizationHandler) GetOrganizationByID(c *gin.Context) {
+	handleGetByID(c, h.repo.GetOrganizationByID)
 }
 
 // CreateOrganization godoc
@@ -56,8 +68,8 @@ func GetOrganizationByID(c *gin.Context) {
 // @Failure 400 {object} entities.ErrorResponse
 // @Failure 500 {object} entities.ErrorResponse
 // @Router /organizations [post]
-func CreateOrganization(c *gin.Context) {
-	handleCreate(c, repository.CreateOrganization)
+func (h *OrganizationHandler) CreateOrganization(c *gin.Context) {
+	handleCreate(c, h.repo.CreateOrganization)
 }
 
 // DeleteOrganization godoc
@@ -67,6 +79,71 @@ func CreateOrganization(c *gin.Context) {
 // @Success 204
 // @Failure 500 {object} entities.ErrorResponse
 // @Router /organizations/{id} [delete]
-func DeleteOrganization(c *gin.Context) {
-	handleDelete(c, repository.DeleteOrganization)
+func (h *OrganizationHandler) DeleteOrganization(c *gin.Context) {
+	handleDelete(c, h.repo.DeleteOrganization)
+}
+
+// GetMembers godoc
+// @Summary Get organization members
+// @Tags Organizations
+// @Produce json
+// @Param id path string true "Organization ID"
+// @Success 200 {array} entities.OrganizationMember
+// @Failure 500 {object} entities.ErrorResponse
+// @Router /organizations/{id}/members [get]
+func (h *OrganizationHandler) GetMembers(c *gin.Context) {
+	id := c.Param("id")
+	members, err := h.repo.GetMembers(id)
+	if err != nil {
+		slog.Error("failed to get members", "error", err, "id", id)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, members)
+}
+
+// AddMember godoc
+// @Summary Add member to organization
+// @Tags Organizations
+// @Accept json
+// @Produce json
+// @Param id path string true "Organization ID"
+// @Param member body entities.CreateOrganizationMemberRequest true "Member"
+// @Success 201 {object} entities.OrganizationMember
+// @Failure 400 {object} entities.ErrorResponse
+// @Failure 500 {object} entities.ErrorResponse
+// @Router /organizations/{id}/members [post]
+func (h *OrganizationHandler) AddMember(c *gin.Context) {
+	orgID := c.Param("id")
+	var req entities.CreateOrganizationMemberRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	member, err := h.repo.AddMember(orgID, req)
+	if err != nil {
+		slog.Error("failed to add member", "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, member)
+}
+
+// RemoveMember godoc
+// @Summary Remove member from organization
+// @Tags Organizations
+// @Param id path string true "Organization ID"
+// @Param user_id path string true "User ID"
+// @Success 204
+// @Failure 500 {object} entities.ErrorResponse
+// @Router /organizations/{id}/members/{user_id} [delete]
+func (h *OrganizationHandler) RemoveMember(c *gin.Context) {
+	orgID := c.Param("id")
+	userID := c.Param("user_id")
+	if err := h.repo.RemoveMember(orgID, userID); err != nil {
+		slog.Error("failed to remove member", "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.Status(http.StatusNoContent)
 }
